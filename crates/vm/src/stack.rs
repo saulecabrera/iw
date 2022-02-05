@@ -50,4 +50,11 @@ mod tests {
         assert!(stack.is_empty());
         assert_eq!(val, 99);
     }
+
+    #[test]
+    #[should_panic]
+    fn pop_empty() {
+        let mut stack = I32Stack::default();
+        stack.pop().unwrap();
+    }
 }
