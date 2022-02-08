@@ -1,2 +1,2 @@
-mod val;
 mod stack;
+mod val;

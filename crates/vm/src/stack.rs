@@ -1,5 +1,5 @@
-use crate::val::Value ;
-use anyhow::{Result, Context};
+use crate::val::Value;
+use anyhow::{Context, Result};
 
 #[derive(Default)]
 pub struct Stack<T> {
@@ -12,7 +12,8 @@ impl<T> Stack<T> {
     }
 
     pub fn pop(&mut self) -> Result<T> {
-        self.stack.pop()
+        self.stack
+            .pop()
             .context("Failed to pop a value when the stack is empty")
     }
 
@@ -42,7 +43,7 @@ mod tests {
     }
 
     #[test]
-    fn pop() { 
+    fn pop() {
         let mut stack = I32Stack::default();
         stack.push(99);
         let val = stack.pop().unwrap();
