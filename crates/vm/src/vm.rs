@@ -1,4 +1,4 @@
-use crate::{val::Value, frame::Frame, label::Label, stack::Stack};
+use crate::{frame::Frame, label::Label, stack::Stack, val::Value};
 
 pub struct VM {
     ip: usize,
@@ -8,6 +8,5 @@ pub struct VM {
 pub enum StackEntry {
     Val(Value),
     CallFrame(Frame),
-    Label(Label)
+    Label(Label),
 }
-

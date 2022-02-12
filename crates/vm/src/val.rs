@@ -11,7 +11,6 @@ pub enum Value {
     I64(i64),
     F32(u32),
     F64(u64),
-
     // TODO
     // -- Reference
     // NullRef,
@@ -20,8 +19,7 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn ty(&self) -> ValueType 
-    {
+    pub fn ty(&self) -> ValueType {
         match *self {
             Value::I32(_) => ValueType::I32,
             Value::I64(_) => ValueType::I64,
@@ -30,4 +28,3 @@ impl Value {
         }
     }
 }
-

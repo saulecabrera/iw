@@ -1,6 +1,6 @@
 pub enum Label {
     If(usize),
-    Block(usize), 
+    Block(usize),
     Ret,
     // (arity, continuation)
     // The continuation of a loop is a given instruction index;
