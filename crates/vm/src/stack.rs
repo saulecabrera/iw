@@ -1,4 +1,3 @@
-use crate::val::Value;
 use anyhow::{Context, Result};
 
 #[derive(Default)]
