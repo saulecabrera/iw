@@ -34,7 +34,8 @@ where
 {
     pub fn push(&mut self, module_index: ModuleIndex, val: T) -> Addr<T> {
         let index = self.addresses.len();
-        self.addresses.insert(Addr::<T>::new_unsafe(module_index, index), val);
+        self.addresses
+            .insert(Addr::<T>::new_unsafe(module_index, index), val);
 
         Addr::<T>::new_unsafe(module_index, index)
     }
@@ -43,5 +44,26 @@ where
         self.addresses.get(&addr)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Addr, Addressable};
+
+    #[test]
+    fn push_and_get() {
+        let mut usizes: Addressable<usize> = Addressable::default();
+        let mut strings: Addressable<String> = Addressable::default();
+
+        let usize_addr = usizes.push(0, 1);
+        let usize_result = usizes.get(&usize_addr).unwrap();
+
+        assert_eq!(usize_addr, Addr::new_unsafe(0, 0));
+        assert_eq!(*usize_result, 1usize);
+
+        let string_addr = strings.push(0, "foo".into());
+        let string_result = strings.get(&string_addr).unwrap();
+
+        assert_eq!(string_addr, Addr::new_unsafe(0, 0));
+        assert_eq!(string_result, "foo");
     }
 }
