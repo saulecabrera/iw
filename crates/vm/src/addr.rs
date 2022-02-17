@@ -32,9 +32,16 @@ impl<T> Addressable<T>
 where
     Addr<T>: Eq + Hash,
 {
-    pub fn push(&mut self, module_index: ModuleIndex, val: T) {
+    pub fn push(&mut self, module_index: ModuleIndex, val: T) -> Addr<T> {
         let index = self.addresses.len();
-        let addr = Addr::<T>::new_unsafe(module_index, index);
-        self.addresses.insert(addr, val);
+        self.addresses.insert(Addr::<T>::new_unsafe(module_index, index), val);
+
+        Addr::<T>::new_unsafe(module_index, index)
+    }
+
+    pub fn get(&self, addr: &Addr<T>) -> Option<&T> {
+        self.addresses.get(&addr)
+    }
+}
     }
 }
