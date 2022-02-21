@@ -1,3 +1,1 @@
-pub type Index = usize;
-
-pub struct Instance {}
+pub struct Module {}

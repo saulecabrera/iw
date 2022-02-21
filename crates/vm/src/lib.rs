@@ -1,5 +1,6 @@
 pub mod addr;
 pub mod frame;
+pub mod instance;
 pub mod label;
 pub mod module;
 pub mod stack;

@@ -1,5 +1,5 @@
-use crate::module::Instance;
+use crate::instance::Instance;
 
 pub struct Store {
-    modules: Vec<Instance>,
+    instances: Vec<Instance>,
 }
