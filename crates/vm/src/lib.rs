@@ -1,4 +1,4 @@
-pub mod addr;
+pub mod addressable;
 pub mod frame;
 pub mod instance;
 pub mod label;

@@ -7,11 +7,11 @@ use std::marker::PhantomData;
 pub struct Addr<T>(InstanceIndex, usize, PhantomData<T>);
 
 impl<T> Addr<T> {
-    pub fn new_unsafe(module_index: InstanceIndex, index: usize) -> Self {
-        Self(module_index, index, PhantomData)
+    pub fn new_unsafe(instance_index: InstanceIndex, index: usize) -> Self {
+        Self(instance_index, index, PhantomData)
     }
 
-    pub fn module_index(&self) -> InstanceIndex {
+    pub fn instance_index(&self) -> InstanceIndex {
         self.0
     }
 }
@@ -32,12 +32,12 @@ impl<T> Addressable<T>
 where
     Addr<T>: Eq + Hash,
 {
-    pub fn push(&mut self, module_index: InstanceIndex, val: T) -> Addr<T> {
+    pub fn push(&mut self, instance_index: InstanceIndex, val: T) -> Addr<T> {
         let index = self.addresses.len();
         self.addresses
-            .insert(Addr::<T>::new_unsafe(module_index, index), val);
+            .insert(Addr::<T>::new_unsafe(instance_index, index), val);
 
-        Addr::<T>::new_unsafe(module_index, index)
+        Addr::<T>::new_unsafe(instance_index, index)
     }
 
     pub fn get(&self, addr: &Addr<T>) -> Option<&T> {
