@@ -1,6 +1,8 @@
 pub mod addressable;
 pub mod frame;
+pub mod func;
 pub mod instance;
+pub mod instr;
 pub mod label;
 pub mod module;
 pub mod stack;
