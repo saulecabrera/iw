@@ -2,10 +2,6 @@ pub type Index = usize;
 
 // Modules and Instances
 //
-// - Module
-//      - Validate a given module
-//      - wasmparser -> Module
-//
 // - Instantiation
 //      - Resolve the exports
 //      - Provide the exports
@@ -20,4 +16,10 @@ pub type Index = usize;
 //        Module, HostFunc, Extern;
 //
 
-pub struct Instance {}
+use wasmparser::FuncType;
+
+// TODO(@saulecabrera): Add exports once supported
+pub struct Instance {
+    index: Index,
+    types: Vec<FuncType>,
+}
