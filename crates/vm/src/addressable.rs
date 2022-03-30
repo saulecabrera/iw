@@ -1,14 +1,13 @@
 use crate::instance::Index as InstanceIndex;
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::marker::PhantomData;
 
 #[derive(Debug, Hash, Copy, Clone, Eq, PartialEq)]
-pub struct Addr<T>(InstanceIndex, usize, PhantomData<T>);
+pub struct Addr(InstanceIndex);
 
-impl<T> Addr<T> {
-    pub fn new_unsafe(instance_index: InstanceIndex, index: usize) -> Self {
-        Self(instance_index, index, PhantomData)
+impl Addr {
+    pub fn new_unsafe(instance_index: InstanceIndex) -> Self {
+        Self(instance_index)
     }
 
     pub fn instance_index(&self) -> InstanceIndex {
@@ -17,30 +16,27 @@ impl<T> Addr<T> {
 }
 
 pub struct Addressable<T> {
-    addresses: HashMap<Addr<T>, T>,
+    addresses: HashMap<Addr, T>,
 }
 
 impl<T> Default for Addressable<T> {
     fn default() -> Self {
         Self {
-            addresses: HashMap::<Addr<T>, T>::new(),
+            addresses: HashMap::<Addr, T>::new(),
         }
     }
 }
 
-impl<T> Addressable<T>
-where
-    Addr<T>: Eq + Hash,
-{
-    pub fn push(&mut self, instance_index: InstanceIndex, val: T) -> Addr<T> {
-        let index = self.addresses.len();
-        self.addresses
-            .insert(Addr::<T>::new_unsafe(instance_index, index), val);
+impl<T> Addressable<T> {
+    pub fn push(&mut self, instance_index: InstanceIndex, val: T) -> Addr {
+        let key = Addr::new_unsafe(instance_index);
 
-        Addr::<T>::new_unsafe(instance_index, index)
+        self.addresses.insert(key, val);
+
+        key
     }
 
-    pub fn get(&self, addr: &Addr<T>) -> Option<&T> {
+    pub fn get(&self, addr: &Addr) -> Option<&T> {
         self.addresses.get(&addr)
     }
 }
@@ -57,13 +53,13 @@ mod tests {
         let usize_addr = usizes.push(0, 1);
         let usize_result = usizes.get(&usize_addr).unwrap();
 
-        assert_eq!(usize_addr, Addr::new_unsafe(0, 0));
+        assert_eq!(usize_addr, Addr::new_unsafe(0));
         assert_eq!(*usize_result, 1usize);
 
         let string_addr = strings.push(0, "foo".into());
         let string_result = strings.get(&string_addr).unwrap();
 
-        assert_eq!(string_addr, Addr::new_unsafe(0, 0));
+        assert_eq!(string_addr, Addr::new_unsafe(0));
         assert_eq!(string_result, "foo");
     }
 }
