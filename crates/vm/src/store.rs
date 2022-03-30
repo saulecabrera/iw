@@ -1,20 +1,21 @@
-use anyhow::{Result, bail};
-use std::borrow::BorrowMut;
-use std::collections::HashMap;
+use crate::addressable::Addressable;
+use crate::instance::Global;
 use crate::instance::{Index as InstanceIndex, Instance};
 use crate::module::Module;
+use anyhow::{bail, Result};
+use std::borrow::BorrowMut;
+use std::collections::HashMap;
 
+#[derive(Default)]
 pub struct Store {
     instances: Vec<Instance>,
     instances_env: HashMap<String, InstanceIndex>,
+    globals: Addressable<Global>,
 }
 
 impl Store {
     pub fn new() -> Self {
-        Store {
-            instances: Vec::new(),
-            instances_env: HashMap::new(),
-        }
+        Self::default()
     }
 
     pub fn instantiate(&mut self, module: &Module, name: Option<String>) -> Result<Instance> {
@@ -31,5 +32,10 @@ impl Store {
         self.instances.push(instance.clone());
 
         Ok(instance)
+    }
+
+    pub fn allocate_global(&mut self, instance_index: InstanceIndex, global: Global) -> Result<()> {
+        self.globals.push(instance_index, global);
+        Ok(())
     }
 }
