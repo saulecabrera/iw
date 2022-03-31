@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 use wasmparser::*;
 
-type Index = u32;
+pub type Index = u32;
 
 struct CustomSection<'a> {
     name: &'a str,
@@ -22,14 +22,14 @@ pub struct Module<'a> {
 
     types: Vec<FuncType>,
     imports: Vec<Import<'a>>,
-    functions: Vec<Index>,
+    pub functions: Vec<Index>,
     tables: Vec<TableType>,
     memories: Vec<MemoryType>,
     pub globals: Vec<Global<'a>>,
     exports: Vec<Export<'a>>,
     elements: Vec<Element<'a>>,
     datas: Vec<Data<'a>>,
-    codes: Vec<FunctionBody<'a>>,
+    pub codes: Vec<FunctionBody<'a>>,
     customs: Vec<CustomSection<'a>>,
     // TODO
     // - What is the purpose of the UnknownSection? Should we error if we encounter it?
