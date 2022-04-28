@@ -1,5 +1,5 @@
 use crate::addressable::Addressable;
-use crate::instance::{Index as InstanceIndex, Instance, global::Global, func::Func};
+use crate::instance::{func::Func, global::Global, Index as InstanceIndex, Instance};
 use crate::module::Module;
 use crate::vm;
 use anyhow::{bail, Result};
@@ -53,7 +53,6 @@ impl<'a> Store<'a> {
             Ok(())
         })
     }
-
 
     fn allocate_funcs(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
         let functions = &module.functions;
