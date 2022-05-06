@@ -1,7 +1,9 @@
 pub mod func;
 pub mod global;
+pub mod table;
 pub use func::*;
 pub use global::*;
+pub use table::*;
 
 use wasmparser::FuncType;
 

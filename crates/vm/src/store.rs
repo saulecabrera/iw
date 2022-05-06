@@ -1,20 +1,21 @@
 use crate::addressable::Addressable;
-use crate::instance::{func::Func, global::Global, Index as InstanceIndex, Instance};
+use crate::instance::{func::Func, global::Global, table::Table, Index as InstanceIndex, Instance};
 use crate::module::Module;
 use crate::vm;
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
 use wasmparser::Global as GlobalReader;
 
 #[derive(Default)]
-pub struct Store<'a> {
+pub struct Store {
     instances: Vec<Instance>,
     instances_env: HashMap<String, InstanceIndex>,
     globals: Addressable<Global>,
-    funcs: Addressable<Func<'a>>,
+    funcs: Addressable<Func>,
+    tables: Addressable<Table>,
 }
 
-impl<'a> Store<'a> {
+impl<'a> Store {
     pub fn new() -> Self {
         Self::default()
     }
@@ -39,7 +40,8 @@ impl<'a> Store<'a> {
 
     fn allocate(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
         self.allocate_globals(&module.globals, index)?;
-        self.allocate_funcs(module, index)
+        self.allocate_funcs(module, index)?;
+        self.allocate_tables(module, index)
     }
 
     fn allocate_globals(
@@ -48,7 +50,7 @@ impl<'a> Store<'a> {
         index: InstanceIndex,
     ) -> Result<()> {
         globals.iter().try_for_each(|global| {
-            let value = vm::eval_const_expr(&global.init_expr)?;
+            let value = vm::resolve_constant_expr(&global.init_expr)?;
             self.globals.push(index, Global::new(value, global.ty));
             Ok(())
         })
@@ -67,10 +69,14 @@ impl<'a> Store<'a> {
                 let ops = body.get_operators_reader()?;
                 let ty = types
                     .get(*func_index as usize)
-                    .ok_or(anyhow::anyhow!("Invalid func index {}", func_index))?;
+                    .with_context(|| format!("Invalid function index {}", func_index))?;
 
                 self.funcs.push(index, Func::new(ty.clone(), locals, ops)?);
                 Ok(())
             })
+    }
+
+    fn allocate_tables(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
+        unimplemented!()
     }
 }

@@ -23,7 +23,7 @@ pub struct Module<'a> {
     types: Vec<FuncType>,
     imports: Vec<Import<'a>>,
     pub functions: Vec<Index>,
-    tables: Vec<TableType>,
+    pub tables: Vec<TableType>,
     memories: Vec<MemoryType>,
     pub globals: Vec<Global<'a>>,
     exports: Vec<Export<'a>>,
@@ -31,8 +31,6 @@ pub struct Module<'a> {
     datas: Vec<Data<'a>>,
     pub codes: Vec<FunctionBody<'a>>,
     customs: Vec<CustomSection<'a>>,
-    // TODO
-    // - What is the purpose of the UnknownSection? Should we error if we encounter it?
 }
 
 impl<'a> Default for Module<'a> {
