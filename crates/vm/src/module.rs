@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 use wasmparser::*;
 
-type Index = u32;
+pub type Index = u32;
 
 struct CustomSection<'a> {
     name: &'a str,
@@ -11,12 +11,7 @@ struct CustomSection<'a> {
 }
 
 pub struct Module<'a> {
-    // Sections not supported, yet
-    // - Alias
-    // - Instance
-    // - Tag
-    // - Module (`ModuleSectionStart`, `ModuleSectionEntry`)
-    //
+    // NB
     // The custom name section can be used to obtain
     // function names. `NameSectionReader` can be used
     // to retrieve function names and `ExportSectionReader`
@@ -27,17 +22,15 @@ pub struct Module<'a> {
 
     types: Vec<FuncType>,
     imports: Vec<Import<'a>>,
-    functions: Vec<Index>,
-    tables: Vec<TableType>,
+    pub functions: Vec<Index>,
+    pub tables: Vec<TableType>,
     memories: Vec<MemoryType>,
-    globals: Vec<Global<'a>>,
+    pub globals: Vec<Global<'a>>,
     exports: Vec<Export<'a>>,
     elements: Vec<Element<'a>>,
     datas: Vec<Data<'a>>,
-    codes: Vec<FunctionBody<'a>>,
+    pub codes: Vec<FunctionBody<'a>>,
     customs: Vec<CustomSection<'a>>,
-    // TODO
-    // - What is the purpose of the UnknownSection? Should we error if we encounter it?
 }
 
 impl<'a> Default for Module<'a> {
@@ -70,6 +63,10 @@ impl<'a> Module<'a> {
 
     pub fn from_binary(data: &'a [u8]) -> Result<Self> {
         Self::parse(data)
+    }
+
+    pub fn func_types(&self) -> Vec<FuncType> {
+        self.types.clone()
     }
 
     fn map_payload(
