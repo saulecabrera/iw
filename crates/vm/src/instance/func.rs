@@ -2,13 +2,13 @@ use crate::instr::Instr;
 use anyhow::Result;
 use wasmparser::{FuncType, LocalsReader, OperatorsReader, Type};
 
-pub struct Func<'a> {
+pub struct Func {
     ty: FuncType,
     locals: Vec<Type>,
-    body: Vec<Instr<'a>>,
+    body: Vec<Instr>,
 }
 
-impl<'a> Func<'a> {
+impl<'a> Func {
     pub fn new(ty: FuncType, locals: LocalsReader, body: OperatorsReader<'a>) -> Result<Self> {
         Ok(Self {
             ty,
@@ -26,7 +26,7 @@ impl<'a> Func<'a> {
             body: body
                 .into_iter()
                 .try_fold(Vec::new(), |mut acc, op| -> Result<_> {
-                    acc.push(Instr::new(op?));
+                    acc.push(Instr::try_from(op?)?);
                     Ok(acc)
                 })?,
         })

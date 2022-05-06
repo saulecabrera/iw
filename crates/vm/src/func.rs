@@ -3,9 +3,9 @@ use crate::instr::Instr;
 use crate::val::Value;
 use wasmparser::FuncType;
 
-pub struct Func<'a> {
+pub struct Func {
     ty: FuncType,
     instace_index: InstanceIndex,
-    instructions: Vec<Instr<'a>>,
+    instructions: Vec<Instr>,
     locals: Vec<Value>,
 }

@@ -1,5 +1,5 @@
 use crate::{frame::Frame, instr::Instr, label::Label, stack::Stack, val::Value};
-use anyhow::Result;
+use anyhow::{Result, Context};
 use wasmparser::InitExpr;
 
 pub struct VM {
@@ -13,9 +13,10 @@ pub enum StackEntry {
     Label(Label),
 }
 
-pub fn eval_const_expr(expr: &InitExpr) -> Result<Value> {
+/// Resolves a constant initializer expression to a runtime value
+pub fn resolve_constant_expr(expr: &InitExpr) -> Result<Value> {
     let mut ops_reader = expr.get_operators_reader();
     let op = ops_reader.read()?;
-    let instr = Instr::new(op);
-    instr.eval_const()
+    let instr = Instr::try_from(op)?;
+    instr.const_value().with_context(|| format!("{:?} is not a constant instruction", instr))
 }
