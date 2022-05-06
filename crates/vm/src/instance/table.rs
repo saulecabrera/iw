@@ -1,5 +1,5 @@
-use anyhow::Result;
 use crate::val::ValueType;
+use anyhow::Result;
 use wasmparser::Type;
 
 pub struct Table {

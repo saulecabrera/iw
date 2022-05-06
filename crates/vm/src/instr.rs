@@ -2,7 +2,7 @@ use crate::val::Value;
 use std::convert::TryFrom;
 use wasmparser::{
     BinaryReaderError, Ieee32, Ieee64, MemoryImmediate, Operator, Operator::*, SIMDLaneIndex, Type,
-    V128, TypeOrFuncType,
+    TypeOrFuncType, V128,
 };
 
 #[derive(Debug)]
@@ -17,7 +17,7 @@ impl Instr {
             Kind::I64Const { value } => Some(Value::I64(value)),
             Kind::F32Const { value } => Some(Value::F32(value.bits())),
             Kind::F64Const { value } => Some(Value::F64(value.bits())),
-            _ => None
+            _ => None,
         }
     }
 }
@@ -53,7 +53,9 @@ impl<'a> TryFrom<Operator<'a>> for Instr {
             End => Kind::End,
             Br { relative_depth } => Kind::Br { relative_depth },
             BrIf { relative_depth } => Kind::BrIf { relative_depth },
-            BrTable { table } => Kind::BrTable { table: convert_table(table)? },
+            BrTable { table } => Kind::BrTable {
+                table: convert_table(table)?,
+            },
             Return => Kind::Return,
             Call { function_index } => Kind::Call { function_index },
             CallIndirect { index, table_index } => Kind::CallIndirect { index, table_index },

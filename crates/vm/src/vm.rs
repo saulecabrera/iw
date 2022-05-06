@@ -1,5 +1,5 @@
 use crate::{frame::Frame, instr::Instr, label::Label, stack::Stack, val::Value};
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use wasmparser::InitExpr;
 
 pub struct VM {
@@ -18,5 +18,7 @@ pub fn resolve_constant_expr(expr: &InitExpr) -> Result<Value> {
     let mut ops_reader = expr.get_operators_reader();
     let op = ops_reader.read()?;
     let instr = Instr::try_from(op)?;
-    instr.const_value().with_context(|| format!("{:?} is not a constant instruction", instr))
+    instr
+        .const_value()
+        .with_context(|| format!("{:?} is not a constant instruction", instr))
 }
