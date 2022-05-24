@@ -1,6 +1,7 @@
 use crate::addressable::Addressable;
 use crate::instance::{func::Func, global::Global, table::Table, Index as InstanceIndex, Instance};
 use crate::module::Module;
+use crate::val::ValueType;
 use crate::vm;
 use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
@@ -77,6 +78,15 @@ impl<'a> Store {
     }
 
     fn allocate_tables(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
-        unimplemented!()
+        let tables = &module.tables;
+        tables.iter().try_for_each(|t| {
+            let ty = ValueType::try_from(t.element_type)?;
+            self.tables
+                .push(index, Table::new(ty, t.initial, t.maximum)?);
+
+            Ok::<(), anyhow::Error>(())
+        })?;
+
+        Ok(())
     }
 }
