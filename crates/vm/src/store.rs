@@ -1,7 +1,9 @@
 use crate::addressable::Addressable;
-use crate::instance::{func::Func, global::Global, table::Table, Index as InstanceIndex, Instance};
+use crate::instance::{
+    elem::Elem, func::Func, global::Global, table::Table, Index as InstanceIndex, Instance,
+};
 use crate::module::Module;
-use crate::val::ValueType;
+use crate::val::{RefValue, ValueType};
 use crate::vm;
 use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
@@ -14,6 +16,7 @@ pub struct Store {
     globals: Addressable<Global>,
     funcs: Addressable<Func>,
     tables: Addressable<Table>,
+    elems: Addressable<Elem>,
 }
 
 impl<'a> Store {
@@ -42,7 +45,8 @@ impl<'a> Store {
     fn allocate(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
         self.allocate_globals(&module.globals, index)?;
         self.allocate_funcs(module, index)?;
-        self.allocate_tables(module, index)
+        self.allocate_tables(module, index)?;
+        self.allocate_elems(module, index)
     }
 
     fn allocate_globals(
@@ -88,5 +92,26 @@ impl<'a> Store {
         })?;
 
         Ok(())
+    }
+
+    fn allocate_elems(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
+        // let elements = &module.elements;
+        // elements.iter().try_for_each(|e| {
+        //     let ty = ValueType::try_from(e.ty)?;
+        //     let items_reader = e.items.get_items_reader()?;
+        //     let acc: Vec<RefValue> = vec![];
+
+        //     items_reader.into_iter().try_fold(acc, |acc, item| {
+
+        //         Ok::<Vec<RefValue>, anyhow::Error>(acc)
+        //     })?;
+
+        //     Ok::<(), anyhow::Error>(())
+        // })?;
+
+        // Ok(())
+        //
+        // See addressable for bug
+        unimplemented!()
     }
 }

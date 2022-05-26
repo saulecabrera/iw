@@ -27,7 +27,7 @@ pub struct Module<'a> {
     memories: Vec<MemoryType>,
     pub globals: Vec<Global<'a>>,
     exports: Vec<Export<'a>>,
-    elements: Vec<Element<'a>>,
+    pub elements: Vec<Element<'a>>,
     datas: Vec<Data<'a>>,
     pub codes: Vec<FunctionBody<'a>>,
     customs: Vec<CustomSection<'a>>,

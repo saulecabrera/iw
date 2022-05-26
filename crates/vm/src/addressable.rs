@@ -27,6 +27,13 @@ impl<T> Default for Addressable<T> {
     }
 }
 
+// 1. Instance index: is the instance that we are currently allocating
+// 2. T index, which represents the where in the index space T appears
+// 3. T the actual instance
+//
+// ---
+//
+// key: <instance_index, index> = guarantee order on index
 impl<T> Addressable<T> {
     pub fn push(&mut self, instance_index: InstanceIndex, val: T) -> Addr {
         let key = Addr::new_unsafe(instance_index);
