@@ -18,12 +18,12 @@ pub trait Slottable {
     fn slot() -> Slot;
 }
 
-/// Represents in address of an element instance in the Store.
+/// Represents an address of an element instance in the Store.
 /// An address is a hash key, made of the following elements:
 ///
-/// InstanceIndex: The module instance which owns particular element instances in the store
-/// ElemIndex: The location of a particular element in its index space
-/// Slot: The type of the index space
+/// * InstanceIndex: The module instance which owns particular element instances in the store
+/// * ElemIndex: The location of a particular element in its index space
+/// * Slot: The type of the index space
 #[derive(Debug, Hash, Copy, Clone, Eq, PartialEq)]
 pub struct Addr(InstanceIndex, ElemIndex, Slot);
 
