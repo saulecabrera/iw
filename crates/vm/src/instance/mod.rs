@@ -17,10 +17,7 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub(crate) fn new(types: Vec<FuncType>, store_index: Index) -> Self {
-        Instance {
-            index: store_index,
-            types,
-        }
+    pub(crate) fn new(types: Vec<FuncType>, index: Index) -> Self {
+        Instance { index, types }
     }
 }

@@ -1,5 +1,4 @@
-use crate::addressable::Addressable;
-use crate::instance::Func;
+use crate::addressable::Addr;
 
 use anyhow::bail;
 use wasmparser::Type;
@@ -28,7 +27,7 @@ pub enum Value {
 }
 
 pub enum RefValue {
-    FuncRef(Addressable<Func>),
+    FuncRef(Addr),
     // TODO: Fill in once imports are supported
     ExternRef,
 }
@@ -67,5 +66,17 @@ impl TryFrom<Type> for ValueType {
         };
 
         Ok(t)
+    }
+}
+
+impl TryFrom<Type> for RefType {
+    type Error = anyhow::Error;
+
+    fn try_from(ty: Type) -> anyhow::Result<RefType> {
+        match ty {
+            Type::ExternRef => Ok(RefType::ExternRef),
+            Type::FuncRef => Ok(RefType::FuncRef),
+            _type => bail!("expected FuncRef or ExternRef, got: {:?}", _type),
+        }
     }
 }

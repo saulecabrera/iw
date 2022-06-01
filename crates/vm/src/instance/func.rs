@@ -1,4 +1,7 @@
-use crate::instr::Instr;
+use crate::{
+    addressable::{Slot, Slottable},
+    instr::Instr,
+};
 use anyhow::Result;
 use wasmparser::{FuncType, LocalsReader, OperatorsReader, Type};
 
@@ -30,5 +33,11 @@ impl<'a> Func {
                     Ok(acc)
                 })?,
         })
+    }
+}
+
+impl Slottable for Func {
+    fn slot() -> Slot {
+        Slot::Func
     }
 }

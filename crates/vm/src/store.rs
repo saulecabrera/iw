@@ -1,13 +1,13 @@
-use crate::addressable::Addressable;
+use crate::addressable::{Addr, Addressable, Slottable};
 use crate::instance::{
     elem::Elem, func::Func, global::Global, table::Table, Index as InstanceIndex, Instance,
 };
 use crate::module::Module;
-use crate::val::{RefValue, ValueType};
+use crate::val::{RefType, RefValue, ValueType};
 use crate::vm;
 use anyhow::{bail, Context, Result};
 use std::collections::HashMap;
-use wasmparser::Global as GlobalReader;
+use wasmparser::{ElementItem, Global as GlobalReader};
 
 #[derive(Default)]
 pub struct Store {
@@ -54,9 +54,13 @@ impl<'a> Store {
         globals: &Vec<GlobalReader>,
         index: InstanceIndex,
     ) -> Result<()> {
-        globals.iter().try_for_each(|global| {
+        globals.iter().enumerate().try_for_each(|(i, global)| {
             let value = vm::resolve_constant_expr(&global.init_expr)?;
-            self.globals.push(index, Global::new(value, global.ty));
+            let elem_index = i
+                .try_into()
+                .with_context(|| format!("Conversion of {} to u32 failed", i))?;
+            self.globals
+                .push(index, elem_index, Global::new(value, global.ty));
             Ok(())
         })
     }
@@ -76,17 +80,21 @@ impl<'a> Store {
                     .get(*func_index as usize)
                     .with_context(|| format!("Invalid function index {}", func_index))?;
 
-                self.funcs.push(index, Func::new(ty.clone(), locals, ops)?);
+                self.funcs
+                    .push(index, *func_index, Func::new(ty.clone(), locals, ops)?);
                 Ok(())
             })
     }
 
     fn allocate_tables(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
         let tables = &module.tables;
-        tables.iter().try_for_each(|t| {
-            let ty = ValueType::try_from(t.element_type)?;
+        tables.iter().enumerate().try_for_each(|(i, t)| {
+            let ty = RefType::try_from(t.element_type)?;
+            let elem_index = i
+                .try_into()
+                .with_context(|| format!("Conversion of {} to u32 failed", i))?;
             self.tables
-                .push(index, Table::new(ty, t.initial, t.maximum)?);
+                .push(index, elem_index, Table::new(ty, t.initial, t.maximum)?);
 
             Ok::<(), anyhow::Error>(())
         })?;
@@ -95,23 +103,36 @@ impl<'a> Store {
     }
 
     fn allocate_elems(&mut self, module: &'a Module, index: InstanceIndex) -> Result<()> {
-        // let elements = &module.elements;
-        // elements.iter().try_for_each(|e| {
-        //     let ty = ValueType::try_from(e.ty)?;
-        //     let items_reader = e.items.get_items_reader()?;
-        //     let acc: Vec<RefValue> = vec![];
+        let elements = &module.elements;
+        elements
+            .iter()
+            .enumerate()
+            .try_for_each(|(element_index, e)| {
+                let ty = RefType::try_from(e.ty)?;
+                let items_reader = e.items.get_items_reader()?;
+                let acc: Vec<RefValue> = vec![];
 
-        //     items_reader.into_iter().try_fold(acc, |acc, item| {
+                // TODO(@saulecabrera): Resolve the `FuncRef` or the initializer expression
+                // in `Elem::new`
+                items_reader.into_iter().try_fold(acc, |mut acc, item| {
+                    let rv = match item? {
+                        ElementItem::Func(idx) => {
+                            let func_addr =
+                                Addr::new_unsafe(index, element_index.try_into()?, Func::slot());
+                            RefValue::FuncRef(func_addr)
+                        }
+                        ElementItem::Expr(init) => {
+                            todo!()
+                        }
+                    };
+                    acc.push(rv);
 
-        //         Ok::<Vec<RefValue>, anyhow::Error>(acc)
-        //     })?;
+                    Ok::<Vec<RefValue>, anyhow::Error>(acc)
+                })?;
 
-        //     Ok::<(), anyhow::Error>(())
-        // })?;
+                Ok::<(), anyhow::Error>(())
+            })?;
 
-        // Ok(())
-        //
-        // See addressable for bug
-        unimplemented!()
+        Ok(())
     }
 }
