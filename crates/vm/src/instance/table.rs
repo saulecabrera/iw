@@ -1,18 +1,27 @@
-use crate::val::ValueType;
+use crate::{
+    addressable::{Slot, Slottable},
+    val::RefType,
+};
 use anyhow::Result;
 
 pub struct Table {
-    ty: ValueType,
+    ty: RefType,
     initial: u32,
     maximum: Option<u32>,
 }
 
 impl Table {
-    pub fn new(ty: ValueType, initial: u32, maximum: Option<u32>) -> Result<Self> {
+    pub fn new(ty: RefType, initial: u32, maximum: Option<u32>) -> Result<Self> {
         Ok(Self {
             ty,
             initial,
             maximum,
         })
+    }
+}
+
+impl Slottable for Table {
+    fn slot() -> Slot {
+        Slot::Table
     }
 }
