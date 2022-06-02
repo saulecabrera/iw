@@ -112,23 +112,20 @@ impl<'a> Store {
                 let items_reader = e.items.get_items_reader()?;
                 let acc: Vec<RefValue> = vec![];
 
-                // TODO(@saulecabrera): Resolve the `FuncRef` or the initializer expression
-                // in `Elem::new`
                 items_reader.into_iter().try_fold(acc, |mut acc, item| {
                     let rv = match item? {
                         ElementItem::Func(idx) => {
-                            let func_addr =
-                                Addr::new_unsafe(index, element_index.try_into()?, Func::slot());
+                            let func_addr = Addr::new_unsafe(index, idx, Func::slot());
                             RefValue::FuncRef(func_addr)
                         }
-                        ElementItem::Expr(init) => {
-                            todo!()
-                        }
+                        ElementItem::Expr(init) => vm::resolve_funcref_expr(&init, index)?,
                     };
                     acc.push(rv);
 
                     Ok::<Vec<RefValue>, anyhow::Error>(acc)
                 })?;
+
+                todo!("Create element instance");
 
                 Ok::<(), anyhow::Error>(())
             })?;
