@@ -9,9 +9,9 @@ pub enum ValueType {
     F32,
     F64,
     RefType(RefType),
-    NullRef(RefType),
 }
 
+#[derive(Copy, Clone)]
 pub enum RefType {
     FuncRef,
     ExternRef,
@@ -22,7 +22,6 @@ pub enum Value {
     I64(i64),
     F32(u32),
     F64(u64),
-    NullRef(RefValue),
     Ref(RefValue),
 }
 
@@ -30,22 +29,20 @@ pub enum RefValue {
     FuncRef(Addr),
     // TODO: Fill in once imports are supported
     ExternRef,
+    Null(RefType),
 }
 
 impl Value {
     pub fn ty(&self) -> ValueType {
-        match *self {
+        match &*self {
             Value::I32(_) => ValueType::I32,
             Value::I64(_) => ValueType::I64,
             Value::F32(_) => ValueType::F32,
             Value::F64(_) => ValueType::F64,
-            Value::NullRef(ref r) => match r {
-                RefValue::ExternRef => ValueType::NullRef(RefType::ExternRef),
-                RefValue::FuncRef(_) => ValueType::NullRef(RefType::FuncRef),
-            },
-            Value::Ref(ref v) => match v {
+            Value::Ref(v) => match v {
                 RefValue::FuncRef(_) => ValueType::RefType(RefType::FuncRef),
                 RefValue::ExternRef => ValueType::RefType(RefType::ExternRef),
+                RefValue::Null(t) => ValueType::RefType(t.clone()),
             },
         }
     }
