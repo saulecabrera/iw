@@ -65,6 +65,10 @@ impl<T: Slottable> Addressable<T> {
     pub fn get(&self, addr: &Addr) -> Option<&T> {
         self.addresses.get(&addr)
     }
+
+    pub fn get_mut(&mut self, addr: &Addr) -> Option<&mut T> {
+        self.addresses.get_mut(&addr)
+    }
 }
 
 #[cfg(test)]
