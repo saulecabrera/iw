@@ -3,6 +3,7 @@ use crate::addressable::Addr;
 use anyhow::bail;
 use wasmparser::Type;
 
+#[derive(PartialEq, Eq)]
 pub enum ValueType {
     I32,
     I64,
@@ -11,12 +12,13 @@ pub enum ValueType {
     RefType(RefType),
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum RefType {
     FuncRef,
     ExternRef,
 }
 
+#[derive(Debug)]
 pub enum Value {
     I32(i32),
     I64(i64),
@@ -25,11 +27,26 @@ pub enum Value {
     Ref(RefValue),
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum RefValue {
     FuncRef(Addr),
     // TODO: Fill in once imports are supported
     ExternRef,
     Null(RefType),
+}
+
+impl RefValue {
+    pub fn ty(&self) -> RefType {
+        match self {
+            RefValue::FuncRef(_) => RefType::FuncRef,
+            RefValue::ExternRef => RefType::ExternRef,
+            RefValue::Null(t) => *t,
+        }
+    }
+
+    pub fn is_func_ref(&self) -> bool {
+        self.ty() == RefType::FuncRef
+    }
 }
 
 impl Value {

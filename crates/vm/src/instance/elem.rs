@@ -1,24 +1,61 @@
+use anyhow::Result;
+
 use crate::{
     addressable::{Slot, Slottable},
-    instr::Instr,
-    val::{RefType, RefValue},
+    val::{RefType, RefValue, Value},
+    vm,
 };
 
+use wasmparser::ElementKind;
+
+#[derive(Debug)]
 pub enum ElemKind {
     Passive,
-    Active { table_index: u32, init_expr: Instr },
+    Active { index: u32, offset: Value },
     Declared,
 }
 
+#[derive(Debug)]
 pub struct Elem {
     ty: RefType,
-    refs: Vec<RefValue>,
+    pub data: Vec<RefValue>,
     kind: ElemKind,
 }
 
 impl Elem {
-    fn new(ty: RefType, refs: Vec<RefValue>, kind: ElemKind) -> Self {
-        Self { ty, refs, kind }
+    pub fn new(ty: RefType, data: Vec<RefValue>, kind: &ElementKind) -> Result<Self> {
+        let kind = match kind {
+            ElementKind::Passive => ElemKind::Passive,
+            ElementKind::Declared => ElemKind::Declared,
+            ElementKind::Active {
+                table_index: idx,
+                init_expr: operator,
+            } => {
+                let val = vm::resolve_constant_expr(&operator)?;
+                ElemKind::Active {
+                    index: *idx,
+                    offset: val,
+                }
+            }
+        };
+
+        Ok(Self { ty, data, kind })
+    }
+
+    /// Is this element segment active?
+    pub fn is_active(&self) -> bool {
+        match self.kind {
+            ElemKind::Active { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Retrieve the metada associated with an active data segment
+    pub fn metadata(&self) -> Option<(u32, &Value)> {
+        match &self.kind {
+            ElemKind::Active { index, offset } => Some((*index, offset)),
+            _ => None,
+        }
     }
 }
 
