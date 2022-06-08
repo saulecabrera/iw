@@ -112,23 +112,35 @@ impl<'a> Store {
                 let items_reader = e.items.get_items_reader()?;
                 let acc: Vec<RefValue> = vec![];
 
-                // TODO(@saulecabrera): Resolve the `FuncRef` or the initializer expression
-                // in `Elem::new`
-                items_reader.into_iter().try_fold(acc, |mut acc, item| {
+                let acc = items_reader.into_iter().try_fold(acc, |mut acc, item| {
                     let rv = match item? {
                         ElementItem::Func(idx) => {
-                            let func_addr =
-                                Addr::new_unsafe(index, element_index.try_into()?, Func::slot());
+                            let func_addr = Addr::new_unsafe(index, idx, Func::slot());
                             RefValue::FuncRef(func_addr)
                         }
-                        ElementItem::Expr(init) => {
-                            todo!()
-                        }
+                        ElementItem::Expr(init) => vm::resolve_funcref_expr(&init, index)?,
                     };
                     acc.push(rv);
 
                     Ok::<Vec<RefValue>, anyhow::Error>(acc)
                 })?;
+
+                let elem_instance = Elem::new(ty, acc, &e.kind)?;
+
+                if elem_instance.is_active() {
+                    let (table_index, offset) = elem_instance.metadata().with_context(|| {
+                        format!("No metadata found on element kind {:?}", elem_instance)
+                    })?;
+                    let table_addr = Addr::new_unsafe(index, table_index, Table::slot());
+                    let table = self
+                        .tables
+                        .get_mut(&table_addr)
+                        .with_context(|| format!("Invalid table address {:?}", table_addr))?;
+                    table.init(&offset, elem_instance.data.clone())?;
+                }
+
+                self.elems
+                    .push(index, u32::try_from(element_index)?, elem_instance);
 
                 Ok::<(), anyhow::Error>(())
             })?;

@@ -1,4 +1,4 @@
-use crate::val::Value;
+use crate::val::{RefValue, Value};
 use std::convert::TryFrom;
 use wasmparser::{
     BinaryReaderError, Ieee32, Ieee64, MemoryImmediate, Operator, Operator::*, SIMDLaneIndex, Type,
@@ -17,6 +17,15 @@ impl Instr {
             Kind::I64Const { value } => Some(Value::I64(value)),
             Kind::F32Const { value } => Some(Value::F32(value.bits())),
             Kind::F64Const { value } => Some(Value::F64(value.bits())),
+            _ => None,
+        }
+    }
+
+    pub fn funcref_idx(&self) -> Option<u32> {
+        match self.kind {
+            Kind::RefFunc {
+                function_index: idx,
+            } => Some(idx),
             _ => None,
         }
     }

@@ -3,49 +3,63 @@ use crate::addressable::Addr;
 use anyhow::bail;
 use wasmparser::Type;
 
+#[derive(PartialEq, Eq)]
 pub enum ValueType {
     I32,
     I64,
     F32,
     F64,
     RefType(RefType),
-    NullRef(RefType),
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum RefType {
     FuncRef,
     ExternRef,
 }
 
+#[derive(Debug)]
 pub enum Value {
     I32(i32),
     I64(i64),
     F32(u32),
     F64(u64),
-    NullRef(RefValue),
     Ref(RefValue),
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum RefValue {
     FuncRef(Addr),
     // TODO: Fill in once imports are supported
     ExternRef,
+    Null(RefType),
+}
+
+impl RefValue {
+    pub fn ty(&self) -> RefType {
+        match self {
+            RefValue::FuncRef(_) => RefType::FuncRef,
+            RefValue::ExternRef => RefType::ExternRef,
+            RefValue::Null(t) => *t,
+        }
+    }
+
+    pub fn is_func_ref(&self) -> bool {
+        self.ty() == RefType::FuncRef
+    }
 }
 
 impl Value {
     pub fn ty(&self) -> ValueType {
-        match *self {
+        match &*self {
             Value::I32(_) => ValueType::I32,
             Value::I64(_) => ValueType::I64,
             Value::F32(_) => ValueType::F32,
             Value::F64(_) => ValueType::F64,
-            Value::NullRef(ref r) => match r {
-                RefValue::ExternRef => ValueType::NullRef(RefType::ExternRef),
-                RefValue::FuncRef(_) => ValueType::NullRef(RefType::FuncRef),
-            },
-            Value::Ref(ref v) => match v {
+            Value::Ref(v) => match v {
                 RefValue::FuncRef(_) => ValueType::RefType(RefType::FuncRef),
                 RefValue::ExternRef => ValueType::RefType(RefType::ExternRef),
+                RefValue::Null(t) => ValueType::RefType(t.clone()),
             },
         }
     }

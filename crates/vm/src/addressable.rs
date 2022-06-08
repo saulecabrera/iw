@@ -2,7 +2,7 @@ use crate::instance::Index as InstanceIndex;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-type ElemIndex = u32;
+pub type ElemIndex = u32;
 
 /// Represents the index space to which a particular
 /// address refers to
@@ -64,6 +64,10 @@ impl<T: Slottable> Addressable<T> {
 
     pub fn get(&self, addr: &Addr) -> Option<&T> {
         self.addresses.get(&addr)
+    }
+
+    pub fn get_mut(&mut self, addr: &Addr) -> Option<&mut T> {
+        self.addresses.get_mut(&addr)
     }
 }
 
